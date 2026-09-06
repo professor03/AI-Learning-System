@@ -12,7 +12,7 @@ export const generateResearch = async (topic: string, field: string): Promise<Re
     
     IMPORTANT:
     1. Output MUST be in Traditional Chinese (Taiwan) / 繁體中文(台灣).
-    2. Use HIGHLY AUTHORITATIVE sources (e.g., academic journals, official government reports, reputable news outlets). Avoid blogs or unverified sources.
+    2. Use HIGHLY AUTHORITATIVE sources (e.g., academic journals, official government reports, reputable news outlets). Avoid blogs or unverified sources. Never invent or simulate a URL.
     3. For each finding, provide a short English image generation prompt that visualizes the concept.
     
     Return 3 key research findings or concepts related to this topic.
@@ -21,7 +21,7 @@ export const generateResearch = async (topic: string, field: string): Promise<Re
       {
         "title": "Title of the finding",
         "summary": "A detailed summary of the finding (approx 50-80 words).",
-        "sourceUrl": "A simulated source URL (e.g., https://example.com/source)",
+        "sourceUrl": "A verified source URL only; if a URL cannot be verified, return an empty string",
         "imagePrompt": "A detailed illustration of..."
       }
     ]
