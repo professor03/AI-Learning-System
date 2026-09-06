@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'SF Pro Display', 'SF Pro Text', Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #0b1120;
+  color: #0f172a;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255, 250, 235, 0.7), transparent 55%),
+    radial-gradient(circle at 80% 0%, rgba(255, 212, 173, 0.35), transparent 60%),
+    linear-gradient(180deg, #fff5ec 0%, #fbe2d0 45%, #f6d9c7 100%);
+  color: #0f172a;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  width: 30rem;
+  height: 30rem;
+  border-radius: 999px;
+  filter: blur(120px);
+  opacity: 0.5;
+  z-index: 0;
+}
+
+body::before {
+  top: -8rem;
+  left: -5rem;
+  background: radial-gradient(circle, rgba(255, 236, 210, 0.7), transparent 65%);
+}
+
+body::after {
+  bottom: -10rem;
+  right: -4rem;
+  background: radial-gradient(circle, rgba(255, 205, 154, 0.55), transparent 65%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/60 border border-white/30 backdrop-blur-2xl shadow-soft;
+  }
+
+  .glass-pill {
+    @apply bg-white/40 border border-white/40 text-text-dark px-4 py-2 rounded-full backdrop-blur-xl shadow-inner;
+  }
+
+  .subtle-animate {
+    @apply animate-fadeIn;
+  }
+
+  /* 3D Transform Utilities for Flashcards */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}
+
