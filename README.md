@@ -1,173 +1,91 @@
-# AI Learning Assistant
+# AI Learning System
 
-一個智能學習助手應用,具備 3D 知識銀河可視化、AI 驅動的簡報生成、研究工具等功能。
+一個以「理解、複習、追蹤學習行為」為核心的 AI 學習系統原型，整合筆記／PDF 學習、AI 問答與測驗、間隔複習，以及 LearnSight 動作辨識服務。
 
-## 功能特點
+> 這是學習研究與推甄展示用的 prototype。部分資料層目前使用 mock data，Gemini API 與 YOLO/LearnSight 需要依照本機環境設定後才能完整運作。
 
-- 📚 **筆記上傳與管理**: 支援 PDF、圖片等多種格式
-- 🌌 **3D 知識銀河**: 互動式 3D 視覺化學習內容
-- 🎤 **AI 簡報生成**: 自動生成專業簡報,支援多種佈局
-- 🔍 **研究助手**: AI 驅動的資料收集與整理
-- 🐾 **學習寵物系統**: 遊戲化學習體驗
-- 📱 **響應式設計**: 完美支援桌面和移動設備
+## 專案亮點
 
-## 技術棧
+- **AI 學習流程**：從教材或筆記建立學習內容，產生摘要、問答與測驗。
+- **間隔複習**：以 FSRS-style 排程記錄答題結果，安排下一次複習。
+- **LearnSight 整合**：連接 YOLO 動作辨識服務，支援開始、同步與結束學習工作階段。
+- **學習儀表板**：集中查看學習進度、筆記、測驗與待複習內容。
+- **React/TypeScript 前端**：以 Vite 建置，適合延伸為研究所專題展示或研究原型。
 
-- **前端框架**: React + TypeScript + Vite
-- **3D 視覺化**: react-force-graph-3d, three.js  
-- **狀態管理**: Zustand
-- **樣式**: Tailwind CSS
-- **動畫**: Framer Motion
-- **AI**: Google Generative AI
+## 技術架構
 
-## 開始使用
+- React + TypeScript + Vite
+- Tailwind CSS、Framer Motion
+- Zustand 狀態管理
+- Google Gemini API（目前由前端呼叫，正式部署前應改用後端／Serverless proxy）
+- FSRS-style spaced repetition
+- LearnSight/YOLO HTTP API
 
-### 安裝依賴
+主要程式位置：
 
-\`\`\`bash
+- `src/routes/`：頁面與主要使用流程
+- `src/components/`：可重用 UI 元件
+- `src/lib/ai.ts`：AI 服務呼叫
+- `src/lib/fsrs.ts`：複習排程邏輯
+- `src/routes/LearnSight.tsx`：LearnSight 連線與工作階段控制
+- `src/lib/api.ts`：目前的資料存取抽象層（部分為 mock data）
+
+## 本機啟動
+
+需要 Node.js 18+。
+
+```bash
 npm install
-\`\`\`
-
-### 開發模式
-
-\`\`\`bash
 npm run dev
-\`\`\`
+```
 
-### 建置生產版本
+建置檢查：
 
-\`\`\`bash
+```bash
 npm run build
-\`\`\`
+```
 
-## Git 版本控制
+## 環境變數與安全提醒
 
-### 基本操作
+建立本機 `.env`：
 
-#### 1. 查看當前狀態
-\`\`\`bash
-git status
-\`\`\`
+```env
+VITE_GEMINI_API_KEY=your_gemini_api_key
+```
 
-#### 2. 查看提交歷史
-\`\`\`bash
-git log --oneline
-# 或查看詳細信息
-git log
-\`\`\`
+請勿將 `.env`、API key、使用者資料或模型檔案提交到 GitHub。Vite 的 `VITE_*` 變數會被打包到瀏覽器，因此正式上線時不應把真正的 Gemini key 放在前端；建議改成後端 API 或 Serverless Function，並限制金鑰來源與配額。
 
-#### 3. 創建新的提交
-\`\`\`bash
-# 添加所有更改的文件
-git add .
+LearnSight 預設連線位址為 `http://localhost:8000`，可在系統設定或環境設定中改成實際服務位址。
 
-# 或添加特定文件
-git add src/components/MyComponent.tsx
+## 目前完成度
 
-# 提交更改
-git commit -m "描述你的更改"
-\`\`\`
+### 已具備
 
-#### 4. 回滾到之前的版本
+- React/Vite 專案結構與主要頁面
+- 筆記、測驗、學習計畫等前端流程
+- FSRS-style 複習邏輯
+- LearnSight 登入、開始、同步、結束的前端整合
+- GitHub 公開專案整理
 
-**選項 A: 臨時查看舊版本(不改變歷史)**
-\`\`\`bash
-# 查看提交歷史,找到想回滾的 commit hash
-git log --oneline
+### 仍需驗證或加強
 
-# 切換到該版本(例如: 8df6c7f)
-git checkout 8df6c7f
+- 本機完整 `npm install`、`npm run build` 驗證
+- Gemini key 的後端代理與錯誤處理
+- 真實資料庫／帳號持久化
+- LearnSight session 結果寫回儀表板
+- 自動化測試與 CI
+- 以真實教材完成一條可錄影展示的端到端流程
 
-# 回到最新版本
-git checkout master
-\`\`\`
+## Demo 建議
 
-**選項 B: 永久回滾(保留歷史記錄)**
-\`\`\`bash
-# 創建一個新的提交來撤銷之前的更改
-git revert <commit-hash>
-\`\`\`
+建議展示一條完整流程：
 
-**選項 C: 硬回滾(刪除歷史,慎用!)**
-\`\`\`bash
-# 警告:這會刪除所有之後的提交!
-git reset --hard <commit-hash>
-\`\`\`
+1. 匯入一份教材或筆記。
+2. 由 AI 產生摘要與測驗。
+3. 完成測驗並記錄 FSRS 複習排程。
+4. 啟動 LearnSight，展示學習工作階段。
+5. 回到儀表板查看學習紀錄與下一次複習時間。
 
-### 連接到 GitHub
+## 專案定位
 
-#### 1. 在 GitHub 創建新倉庫
-訪問 https://github.com/new 創建一個新的倉庫
-
-#### 2. 添加遠程倉庫
-\`\`\`bash
-git remote add origin https://github.com/你的用戶名/倉庫名稱.git
-\`\`\`
-
-#### 3. 推送到 GitHub
-\`\`\`bash
-# 第一次推送
-git push -u origin master
-
-# 之後的推送
-git push
-\`\`\`
-
-#### 4. 從 GitHub 拉取更新
-\`\`\`bash
-git pull origin master
-\`\`\`
-
-### 分支管理
-
-#### 創建新分支進行開發
-\`\`\`bash
-# 創建並切換到新分支
-git checkout -b feature/新功能名稱
-
-# 在新分支上工作和提交
-git add .
-git commit -m "添加新功能"
-
-# 切換回主分支
-git checkout master
-
-# 合併新分支
-git merge feature/新功能名稱
-\`\`\`
-
-## 推薦的工作流程
-
-1. **開始新功能前先創建新分支**
-   \`\`\`bash
-   git checkout -b feature/功能名稱
-   \`\`\`
-
-2. **定期提交更改**
-   \`\`\`bash
-   git add .
-   git commit -m "具體的更改描述"
-   \`\`\`
-
-3. **功能完成後合併到主分支**
-   \`\`\`bash
-   git checkout master
-   git merge feature/功能名稱
-   \`\`\`
-
-4. **推送到 GitHub(如果已設置)**
-   \`\`\`bash
-   git push
-   \`\`\`
-
-## 環境變數設置
-
-創建 \`.env\` 文件並添加你的 API 密鑰:
-
-\`\`\`
-VITE_GEMINI_API_KEY=你的_Google_AI_密鑰
-\`\`\`
-
-## 授權
-
-MIT License
+本專案不是只展示畫面，而是把 AI 教學、學習科學（間隔複習）與視覺／行為辨識串成一個可操作的研究原型。後續可朝學習成效評估、個人化推薦與多模態學習分析延伸。
