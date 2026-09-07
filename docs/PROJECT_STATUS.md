@@ -1,6 +1,6 @@
 # Project Status
 
-最後更新：2026-09-06
+最後更新：2026-09-07
 
 ## 已完成
 
@@ -17,17 +17,17 @@
 
 ### 高優先
 
-- [ ] 以後端或 Serverless Function 代理 Gemini API
-- [ ] 將 LearnSight session 寫入學習紀錄並顯示在儀表板
-- [ ] 使用固定教材完成端到端 Demo
-- [ ] 在本機完成 npm install 與 npm run build 驗證
+- [x] 以本機 Node 後端代理 Gemini API
+- [x] 將 LearnSight 已結束時段寫入本機紀錄並顯示在儀表板
+- [x] 使用固定離線教材完成測驗、複習與保存的瀏覽器驗證
+- [x] 在本機完成依賴安裝與正式建置驗證
 
 ### 中優先
 
-- [ ] 加入 FSRS 核心函式測試
-- [ ] 加入 PDF 匯入與 AI 出題錯誤處理測試
-- [ ] 補上 package-lock.json
-- [ ] 建立 GitHub Actions 的建置檢查
+- [x] 加入 FSRS 核心函式測試
+- [x] 加入 PDF 匯入與 AI 出題錯誤處理測試
+- [x] 補上 package-lock.json
+- [x] 建立 GitHub Actions 的建置檢查設定（執行結果以 Actions 為準）
 
 ### 推甄展示
 

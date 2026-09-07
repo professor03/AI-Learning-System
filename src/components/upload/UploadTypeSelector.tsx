@@ -3,10 +3,7 @@ import { useAppStore } from '../../store/useAppStore';
 import Card from '../ui/Card';
 
 const types: { label: string; value: MaterialType }[] = [
-  { label: 'PPT', value: 'ppt' },
   { label: 'PDF', value: 'pdf' },
-  { label: 'Image', value: 'image' },
-  { label: 'Audio', value: 'audio' },
 ];
 
 const UploadTypeSelector = () => {
@@ -15,6 +12,7 @@ const UploadTypeSelector = () => {
   return (
     <Card>
       <h2 className="text-xl font-semibold mb-4">選擇教材類型</h2>
+      <p className="mb-3 text-sm text-gray-600">目前可讀取文字型 PDF 與 TXT。圖片、錄音與簡報請先轉成文字或 PDF。</p>
       <div className="grid grid-cols-2 gap-3">
         {types.map((type) => (
           <label

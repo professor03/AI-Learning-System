@@ -49,7 +49,7 @@ export default function MemoryHealthChart({ retentionRate, riskItems, masteryDis
                                 ))}
                             </Pie>
                             <Tooltip 
-                                formatter={(value: number) => [hasData ? `${value} 張卡片` : '無資料', '數量']}
+                                formatter={(value) => [hasData ? `${value ?? 0} 張卡片` : '無資料', '數量']}
                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                             />
                         </PieChart>

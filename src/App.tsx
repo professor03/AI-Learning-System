@@ -67,7 +67,11 @@ function App() {
     else if (quality === 4) rating = 'Good';
     else if (quality === 5) rating = 'Easy';
 
-    const updatedAtom = calculateNextReview(atom as any, rating, Date.now());
+    const updatedAtom = calculateNextReview({
+      ...atom,
+      due: atom.nextReview,
+      last_review: atom.reps > 0 ? atom.lastReview : null,
+    }, rating, Date.now());
     
     // We only need to update the FSRS specific fields
     updateAtom(atomId, {

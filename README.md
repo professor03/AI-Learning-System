@@ -17,7 +17,7 @@
 - React + TypeScript + Vite
 - Tailwind CSS、Framer Motion
 - Zustand 狀態管理
-- Google Gemini API（目前由前端呼叫，正式部署前應改用後端／Serverless proxy）
+- Google Gemini API（由 Node.js 本機後端代理，金鑰不進入前端）
 - FSRS-style spaced repetition
 - LearnSight/YOLO HTTP API
 
@@ -32,17 +32,20 @@
 
 ## 本機啟動
 
-需要 Node.js 18+。
+需要 Node.js 22.12 以上。先將 `.env.example` 複製為 `.env`，有 Gemini 金鑰時填入 `GEMINI_API_KEY`；不填也能體驗離線示範。
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-建置檢查：
+開啟 http://127.0.0.1:5173。這個命令同時啟動前端與本機 AI 後端。
+
+穩定展示模式（直接使用正式建置）：
 
 ```bash
 npm run build
+npm start
 ```
 
 ## 環境變數與安全提醒
@@ -50,10 +53,13 @@ npm run build
 建立本機 `.env`：
 
 ```env
-VITE_GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-flash-latest
 ```
 
-請勿將 `.env`、API key、使用者資料或模型檔案提交到 GitHub。Vite 的 `VITE_*` 變數會被打包到瀏覽器，因此正式上線時不應把真正的 Gemini key 放在前端；建議改成後端 API 或 Serverless Function，並限制金鑰來源與配額。
+`npm start` 的展示網址為 http://127.0.0.1:8787。所有 AI 功能經過 `/api/ai/generate`，後端限制輸入長度、請求頻率、來源與逾時，並遮蔽供應商錯誤中的敏感資訊。舊版的 `VITE_GEMINI_API_KEY` 已不使用，請從舊 `.env` 移除；若舊版曾公開部署，應重新簽發金鑰。
+
+目前後端僅監聽本機，適合個人展示。公開部署仍需要身分驗證、HTTPS、每位使用者的用量限制與正式資料庫；不能只把前端放到靜態網站就使用 AI 功能。
 
 LearnSight 預設連線位址為 `http://localhost:8000`，可在系統設定或環境設定中改成實際服務位址。
 
@@ -66,25 +72,47 @@ LearnSight 預設連線位址為 `http://localhost:8000`，可在系統設定或
 - FSRS-style 複習邏輯
 - LearnSight 登入、開始、同步、結束的前端整合
 - GitHub 公開專案整理
+- 首頁離線示範：預先編寫的教材、三題測驗與四張複習卡
+- LearnSight 已結束時段保存在目前瀏覽器，儀表板可回顧／匯出／清除，最多 200 筆
+- AI 摘要與測驗的回應格式驗證，避免儲存缺少答案或章節的結果
+- PDF／TXT 匯入限制與錯誤提示，PDF 解析元件隨專案提供
+- 核心單元測試、瀏覽器流程測試與 GitHub Actions 設定
 
 ### 仍需驗證或加強
 
-- 本機完整 `npm install`、`npm run build` 驗證
-- Gemini key 的後端代理與錯誤處理
 - 真實資料庫／帳號持久化
-- LearnSight session 結果寫回儀表板
-- 自動化測試與 CI
-- 以真實教材完成一條可錄影展示的端到端流程
+- 使用你自己的 Gemini 金鑰驗證實際生成品質
+- 以實際 YOLO 服務、帳號與攝影機驗證現場訊號
+- 掃描 PDF 的 OCR、圖片與錄音輸入尚未支援
+- 研究助手目前僅產生構想，沒有即時網頁檢索，不提供生成的引用網址
+- 儀表板的舊「今日任務」仍以示範資料初始化；LearnSight 新紀錄為獨立的本機保存資料
 
 ## Demo 建議
 
-建議展示一條完整流程：
+不需金鑰的展示：首頁點「載入離線示範教材」，依序閱讀筆記、開始示範測驗、開始間隔複習。這些內容明確標示為預先編寫，不能作為 AI 生成品質的實驗證據。
+
+有金鑰與攝影機後，展示完整流程：
 
 1. 匯入一份教材或筆記。
 2. 由 AI 產生摘要與測驗。
 3. 完成測驗並記錄 FSRS 複習排程。
 4. 啟動 LearnSight，展示學習工作階段。
 5. 回到儀表板查看學習紀錄與下一次複習時間。
+
+LearnSight 只提供人員存在的聚合訊號；時段分鐘數不等於專注分鐘數。進行中的連線可跨頁面保留，重新整理會清除登入憑證，因此請先結束時段。僅已結束時段會寫入歷史。
+
+## 驗證
+
+```bash
+npm test
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+瀏覽器測試使用正式建置。AI 與 YOLO 回應由固定測試資料代替，驗證的是介面、API 串接與資料保存，不代表真實模型準確率。測試不需要私密金鑰，也不會呼叫付費 AI。
+
+Windows 已安裝 Chrome 時，可設定 `PLAYWRIGHT_CHANNEL=chrome` 執行瀏覽器測試。若開發模式受到本機目錄權限限制，請使用上面的正式建置展示模式。
 
 ## 專案定位
 

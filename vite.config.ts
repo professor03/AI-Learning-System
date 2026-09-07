@@ -8,6 +8,9 @@ export default defineConfig({
         outDir: 'dist',
     },
     server: {
-        host: '0.0.0.0',
+        host: '127.0.0.1',
+        port: 5173,
+        strictPort: true,
+        proxy: { '/api': 'http://127.0.0.1:8787' },
     },
 })

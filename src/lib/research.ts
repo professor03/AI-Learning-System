@@ -1,9 +1,6 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { model } from './aiClient';
 import type { ResearchResult } from '../types';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
 export const generateResearch = async (topic: string, field: string): Promise<ResearchResult[]> => {
   const prompt = `
@@ -44,6 +41,8 @@ export const generateResearch = async (topic: string, field: string): Promise<Re
     return data.map((item: any) => ({
       ...item,
       id: crypto.randomUUID(),
+      // This endpoint has no retrieval tool. Never present generated URLs as citations.
+      sourceUrl: '',
     }));
   } catch (error) {
     console.error('Research generation error:', error);

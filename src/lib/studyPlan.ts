@@ -1,10 +1,7 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { model } from './aiClient';
 import type { StudyPlanItem } from '../types';
 import type { KnowledgeAtom } from '../types/memory';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
 export const generateStudyPlan = async (
   _examDate: Date,

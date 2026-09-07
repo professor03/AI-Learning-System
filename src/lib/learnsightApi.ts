@@ -33,6 +33,7 @@ const request = async <T>(
   try {
     response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
       ...init,
+      signal: AbortSignal.timeout(15_000),
       headers: {
         'Content-Type': 'application/json',
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),

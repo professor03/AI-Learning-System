@@ -46,18 +46,11 @@ Thumbs.db
 *.key
 *.pem
 
-# Documentation (exclude all .md files)
-*.md
-
-# Test and Debug files
-src/scripts/test-*.ts
-src/scripts/test-*.js
-src/components/debug/
-src/__tests__/
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
+# Local secrets and generated test output
+.env.*
+!.env.example
+test-results/
+playwright-report/
 
 # Antigravity artifacts (agent workspace)
 .gemini/

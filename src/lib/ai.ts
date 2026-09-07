@@ -1,16 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { model } from './aiClient';
+import { parseNotes, parseQuiz } from './aiValidation';
 import type { LectureNotes, QuizQuestion } from '../types';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
-if (!API_KEY) {
-  console.error('Missing VITE_GEMINI_API_KEY in .env file');
-}
-
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
 export const generateNotes = async (text: string, courseName: string): Promise<LectureNotes> => {
+  if (!text.trim() || !courseName.trim()) throw new Error('請提供教材內容與課程名稱。');
   const prompt = `
     You are an expert student tutor. Analyze the following text from the course "${courseName}" and create structured lecture notes.
     
@@ -53,8 +47,7 @@ export const generateNotes = async (text: string, courseName: string): Promise<L
     const textResponse = response.text();
 
     // Clean up markdown code blocks if present
-    const cleanJson = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-    const data = JSON.parse(cleanJson);
+    const data = parseNotes(textResponse);
 
     return {
       id: crypto.randomUUID(),
@@ -76,6 +69,9 @@ export const generateQuiz = async (
   text: string,
   options: { count: number; type: string; allowExternal: boolean } = { count: 3, type: 'mixed', allowExternal: false }
 ): Promise<QuizQuestion[]> => {
+  if (!text.trim() || !Number.isInteger(options.count) || options.count < 1 || options.count > 30) {
+    throw new Error('請提供教材，題數需為 1～30 的整數。');
+  }
   const prompt = `
     You are an expert exam creator. Create ${options.count} quiz questions based on the provided text.
     
@@ -131,8 +127,7 @@ export const generateQuiz = async (
     const response = await result.response;
     const textResponse = response.text();
 
-    const cleanJson = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-    const data = JSON.parse(cleanJson);
+    const data = parseQuiz(textResponse, options.count);
 
     return data.map((q: any) => ({
       ...q,

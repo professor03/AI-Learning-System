@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useMemoryStore } from '../../store/useMemoryStore';
 import { useAppStore } from '../../store/useAppStore';
 import Button from '../ui/Button';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { model } from '../../lib/aiClient';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AddAssetModalProps {
@@ -123,15 +123,6 @@ export default function AddAssetModal({ stockId, stockName, onClose }: AddAssetM
         setGeneratedCards([]);
 
         try {
-            const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-            if (!apiKey) {
-                alert('請在專案根目錄的 .env 文件中設置 VITE_GEMINI_API_KEY\n\n範例：\nVITE_GEMINI_API_KEY=your_api_key_here');
-                setIsGenerating(false);
-                return;
-            }
-
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
             // Get content from note (summary + sections)
             const noteContent = `${sourceNote.summary}\n\n${sourceNote.sections.map(s => `${s.title}\n${s.content}`).join('\n\n')}`;
@@ -179,7 +170,6 @@ ${noteContent}
             const response = await result.response;
             const text = response.text();
 
-            console.log('AI Response:', text); // Debug log
 
             // 嘗試解析 JSON 陣列
             const jsonMatch = text.match(/\[[\s\S]*\]/);

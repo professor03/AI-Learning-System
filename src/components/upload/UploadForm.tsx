@@ -33,9 +33,12 @@ const UploadForm = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!file || !course) {
+    if (!file || !course.trim()) {
       alert('請填寫課程並上傳檔案');
       return;
+    }
+    if (file.size > 20 * 1024 * 1024 || !/\.(pdf|txt)$/i.test(file.name)) {
+      alert('請上傳 20 MB 以內的 PDF 或 TXT 教材。'); return;
     }
 
     try {
@@ -44,13 +47,14 @@ const UploadForm = () => {
       setGenerationProgress(0);
 
       let text = '';
-      if (file.type === 'application/pdf') {
+      if (/\.pdf$/i.test(file.name)) {
         text = await extractTextFromPdf(file);
       } else {
         // Fallback for text files or just assuming text for now
         text = await file.text();
       }
 
+      if (!text.trim()) throw new Error('教材中沒有可讀取的文字。');
       setStatus('AI 正在閱讀並整理筆記...');
       const note = await generateNotes(text, course);
 
@@ -101,7 +105,7 @@ const UploadForm = () => {
       <h2 className="text-xl font-semibold mb-4">上傳教材（{uploadType.toUpperCase()}）</h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <label className="flex flex-col gap-2 text-sm text-text-normal">
-          教材檔案 (支援 PDF)
+          教材檔案（PDF／TXT，最多 20 MB）
           <input
             id="file-input"
             type="file"

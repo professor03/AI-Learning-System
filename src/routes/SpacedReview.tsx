@@ -77,11 +77,11 @@ export default function SpacedReview() {
     if (currentIndex < sessionAtoms.length - 1) {
       setTimeout(() => setCurrentIndex(prev => prev + 1), 300);
     } else {
-      finishSession();
+      finishSession(sessionStats.xp + xpGain);
     }
   };
 
-  const finishSession = () => {
+  const finishSession = (totalXP: number) => {
     setIsSessionComplete(true);
     const durationMinutes = Math.ceil((Date.now() - sessionStats.startTime) / 60000);
 
@@ -91,7 +91,7 @@ export default function SpacedReview() {
       date: Date.now(),
       durationMinutes,
       type: 'review',
-      xpGained: sessionStats.xp
+      xpGained: totalXP
     });
 
     // Update Missions

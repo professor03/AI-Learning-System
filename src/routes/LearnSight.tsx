@@ -6,33 +6,38 @@ import {
   loginLearnSight,
   startLearnSightSession,
   syncLearnSightVision,
-  type LearnSightSession,
 } from '../lib/learnsightApi';
+import { useLearnSightConnection, useLearnSightHistory } from '../store/useLearnSightStore';
+import LearnSightHistory from '../components/dashboard/LearnSightHistory';
 
 const CONNECTOR_URL_KEY = 'ai-student-learnsight-url';
-const DEFAULT_CONNECTOR_URL = 'http://localhost:8000';
+const DEFAULT_CONNECTOR_URL = import.meta.env.VITE_LEARNSIGHT_API_URL || 'http://localhost:8000';
 
 const formatDateTime = (value: string | null) => {
-  if (!value) return '尚無資料';
+  if (!value || !Number.isFinite(Date.parse(value))) return '尚無資料';
   return new Intl.DateTimeFormat('zh-TW', {
     hour: '2-digit', minute: '2-digit', second: '2-digit',
   }).format(new Date(value));
 };
 
 const LearnSight = () => {
-  const [baseUrl, setBaseUrl] = useState(() => window.localStorage.getItem(CONNECTOR_URL_KEY) || DEFAULT_CONNECTOR_URL);
+  const [baseUrl, setBaseUrl] = useState(() => {
+    try { return window.localStorage.getItem(CONNECTOR_URL_KEY) || DEFAULT_CONNECTOR_URL; }
+    catch { return DEFAULT_CONNECTOR_URL; }
+  });
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [session, setSession] = useState<LearnSightSession | null>(null);
-  const [goal, setGoal] = useState('完成今天的複習任務');
-  const [plannedMinutes, setPlannedMinutes] = useState(25);
+  const { accessToken, setAccessToken, session, setSession } = useLearnSightConnection();
+  const saveSession = useLearnSightHistory(state => state.save);
+  const [goal, setGoal] = useState(session?.study_goal || '完成今天的複習任務');
+  const [plannedMinutes, setPlannedMinutes] = useState(session?.planned_minutes || 25);
   const [autoSync, setAutoSync] = useState(true);
   const [message, setMessage] = useState('尚未連線。登入 YOLO 視覺服務後即可開始。');
   const [isBusy, setIsBusy] = useState(false);
 
   useEffect(() => {
-    window.localStorage.setItem(CONNECTOR_URL_KEY, baseUrl.trim() || DEFAULT_CONNECTOR_URL);
+    try { window.localStorage.setItem(CONNECTOR_URL_KEY, baseUrl.trim() || DEFAULT_CONNECTOR_URL); }
+    catch { setMessage('無法保存服務網址，重新整理後需要再次填入。'); }
   }, [baseUrl]);
 
   const syncVision = useCallback(async (showMessage: boolean) => {
@@ -42,7 +47,7 @@ const LearnSight = () => {
       setSession(next);
       if (showMessage) setMessage('已同步最新的人數訊號。');
     } catch (error) {
-      if (showMessage) setMessage(error instanceof Error ? error.message : '同步失敗');
+      setMessage(error instanceof Error ? error.message : '同步失敗');
     }
   }, [accessToken, baseUrl, session]);
 
@@ -75,6 +80,9 @@ const LearnSight = () => {
 
   const handleStart = async () => {
     if (!accessToken) { setMessage('請先連線至 YOLO 視覺服務。'); return; }
+    if (!goal.trim() || !Number.isInteger(plannedMinutes) || plannedMinutes < 5 || plannedMinutes > 480) {
+      setMessage('請輸入學習目標，分鐘數需為 5～480 的整數。'); return;
+    }
     setIsBusy(true);
     try {
       const next = await startLearnSightSession(baseUrl, accessToken, goal, plannedMinutes);
@@ -91,7 +99,8 @@ const LearnSight = () => {
     try {
       const next = await endLearnSightSession(baseUrl, accessToken, session.session_id);
       setSession(next);
-      setMessage('讀書時段已結束。');
+      const saved = saveSession(next);
+      setMessage(saved ? '讀書時段已結束並儲存，可到儀表板回顧。' : '時段已結束，但儲存發生問題，請查看下方紀錄提示。');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '無法結束讀書時段');
     } finally { setIsBusy(false); }
@@ -110,7 +119,7 @@ const LearnSight = () => {
       <Card className="border border-blue-100 bg-gradient-to-br from-blue-50 to-white">
         <div className="flex flex-col gap-4 md:flex-row md:items-end">
           <label className="flex-1 text-sm font-semibold text-gray-700">YOLO 服務網址
-            <input value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} placeholder="http://localhost:8000" className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none ring-primary focus:ring-2" />
+            <input value={baseUrl} disabled={Boolean(accessToken)} onChange={(event) => setBaseUrl(event.target.value)} placeholder="http://localhost:8000" className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none ring-primary focus:ring-2" />
           </label>
           <label className="flex-1 text-sm font-semibold text-gray-700">帳號
             <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none ring-primary focus:ring-2" />
@@ -119,6 +128,7 @@ const LearnSight = () => {
             <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none ring-primary focus:ring-2" />
           </label>
           <Button onClick={() => void handleLogin()} disabled={isBusy || Boolean(accessToken)}>{accessToken ? '已連線' : '連線'}</Button>
+          {accessToken && <Button variant="ghost" disabled={isBusy || session?.status === 'active'} onClick={() => { setAccessToken(null); setSession(null); setMessage('已登出。'); }}>登出</Button>}
         </div>
         <p className="mt-3 text-xs text-gray-500">密碼不會被保存；存取憑證只留在目前頁面的記憶體，重新整理後需再次登入。</p>
       </Card>
@@ -148,6 +158,7 @@ const LearnSight = () => {
       </div>
 
       {isActive && <Card variant="outline" className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black text-gray-800">每 20 秒自動同步</h3><p className="mt-1 text-sm text-gray-600">從 YOLO 的共用資料摘要讀取人數，不傳送影像。</p></div><label className="flex items-center gap-2 text-sm font-semibold text-gray-700"><input type="checkbox" checked={autoSync} onChange={(event) => setAutoSync(event.target.checked)} />啟用</label></Card>}
+      <LearnSightHistory />
     </div>
   );
 };

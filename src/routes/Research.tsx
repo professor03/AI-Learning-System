@@ -113,7 +113,7 @@ const Research = () => {
           className={`pb-2 px-4 font-medium transition-colors ${sourceType === 'web' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
           onClick={() => setSourceType('web')}
         >
-          🌐 網路搜尋
+          AI 研究構想
         </button>
         <button
           className={`pb-2 px-4 font-medium transition-colors ${sourceType === 'note' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
@@ -186,8 +186,9 @@ const Research = () => {
                 </AnimatePresence>
               </div>
               <Button type="submit" disabled={isSearching}>
-                {isSearching ? 'AI 正在搜尋與整理資料...' : '開始蒐集資料'}
+                {isSearching ? 'AI 正在整理構想...' : '產生研究構想'}
               </Button>
+              <p className="text-sm text-gray-600">此功能提供 AI 研究構想，尚未連接網頁檢索或論文資料庫；內容需自行查證。</p>
             </form>
           </Card>
 

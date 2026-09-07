@@ -19,8 +19,8 @@ const w = [
   0.94, 2.18, 0.05, 0.34, 1.26, 0.29, 2.61
 ];
 
-export const createEmptyCard = (): Card => ({
-  due: Date.now(),
+export const createEmptyCard = (now = Date.now()): Card => ({
+  due: now,
   stability: 0,
   difficulty: 0,
   elapsed_days: 0,
@@ -43,7 +43,7 @@ export const calculateNextReview = (card: Card, rating: Rating, now: number): Ca
   newCard.reps += 1;
 
   // Calculate elapsed days since last review
-  newCard.elapsed_days = card.last_review ? Math.max(0, (now - card.last_review) / 86400000) : 0;
+  newCard.elapsed_days = card.last_review !== null ? Math.max(0, (now - card.last_review) / 86400000) : 0;
 
   const ratingValue = { Again: 1, Hard: 2, Good: 3, Easy: 4 }[rating];
 
@@ -70,7 +70,7 @@ export const calculateNextReview = (card: Card, rating: Rating, now: number): Ca
     newCard.difficulty = Math.min(10, Math.max(1, card.difficulty + w[7] * (next_d - card.difficulty)));
     
     // 2. 計算可回憶率 (Retrievability)
-    const retrievability = Math.pow(1 + card.elapsed_days / (9 * card.stability), -1);
+    const retrievability = Math.pow(1 + newCard.elapsed_days / (9 * Math.max(0.01, card.stability)), -1);
 
     if (rating === 'Again') {
       newCard.lapses += 1;

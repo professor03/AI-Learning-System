@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import DailyCoaching from '../components/dashboard/DailyCoaching';
+import LearnSightHistory from '../components/dashboard/LearnSightHistory';
+import DemoGuide from '../components/dashboard/DemoGuide';
 import TodayTasks from '../components/dashboard/TodayTasks';
 import CalendarPanel from '../components/dashboard/CalendarPanel';
 import { api } from '../lib/api';
@@ -228,6 +230,8 @@ const Dashboard = () => {
 
       {activeTab === 'daily' && (
         <>
+          <DemoGuide />
+          <LearnSightHistory />
           {/* 0. Daily Review CTA (Spaced Repetition) */}
           {dueAtoms.length > 0 && (
             <div className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-6 text-gray-900 shadow-lg mb-6 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -261,6 +265,7 @@ const Dashboard = () => {
           </div>
 
           {/* 3. Today Tasks & Coaching */}
+          <p className="text-xs text-gray-500">下方今日任務以示範資料初始化；自行新增或修改的任務目前僅保留至本頁重新載入。</p>
           <div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr] mt-6">
             <TodayTasks
               tasks={tasks}

@@ -2,13 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { useMemoryStore } from '../../store/useMemoryStore';
 import Button from '../ui/Button';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { model } from '../../lib/aiClient';
 import { getStockStats } from '../../lib/stockUtils';
 import { globalSearchEngine } from '../../lib/searchEngine';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
 interface Message {
     id: string;
