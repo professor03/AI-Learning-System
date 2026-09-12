@@ -26,6 +26,7 @@ import { calculateDividend } from './lib/stockUtils';
 import { usePetSystem } from './hooks/usePetSystem';
 import { useStudyTimer } from './hooks/useStudyTimer';
 import { useGlobalTimer } from './hooks/useGlobalTimer';
+import { useLearnSightSync } from './hooks/useLearnSightSync';
 
 // Page Transition Wrapper
 const PageTransition = ({ children }: { children: React.ReactNode }) => (
@@ -44,6 +45,7 @@ function App() {
   usePetSystem();
   useStudyTimer(); // Activate study timer
   useGlobalTimer(); // Activate global pomodoro timer
+  useLearnSightSync();
   const { isChatOpen, setChatOpen, reviewModal, closeReviewModal, rewardPet, isFocusMode, initApp, setCurrentLocation } = useAppStore();
   const { atoms, updateAtom, recordDividend } = useMemoryStore();
   const location = useLocation();
@@ -134,3 +136,4 @@ function App() {
 }
 
 export default App;
+

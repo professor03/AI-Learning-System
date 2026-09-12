@@ -12,6 +12,12 @@ export interface LearnSightSession {
   away_reminder_eligible: boolean;
   observation_count: number;
   note: string;
+  person_count?: number | null;
+  last_observed_at?: string | null;
+  detector_source_id?: string | null;
+  signal_origin?: 'none' | 'manual' | 'detector';
+  signal_status?: 'waiting' | 'fresh' | 'stale' | 'unavailable';
+  signal_max_age_seconds?: number;
 }
 
 interface LoginResponse {
@@ -59,12 +65,14 @@ export const startLearnSightSession = (
   accessToken: string,
   studyGoal: string,
   plannedMinutes: number,
+  detectorSourceId?: string,
 ) => request<LearnSightSession>(baseUrl, '/api/v1/learnsight/sessions', {
   method: 'POST',
   body: JSON.stringify({
     study_goal: studyGoal,
     planned_minutes: plannedMinutes,
     source_id: 'ai-student-os',
+    ...(detectorSourceId?.trim() ? { detector_source_id: detectorSourceId.trim() } : {}),
   }),
 }, accessToken);
 
@@ -77,3 +85,4 @@ export const endLearnSightSession = (baseUrl: string, accessToken: string, sessi
   request<LearnSightSession>(baseUrl, `/api/v1/learnsight/sessions/${sessionId}/end`, {
     method: 'POST',
   }, accessToken);
+

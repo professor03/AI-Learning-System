@@ -8,6 +8,9 @@ const summarySchema = z.object({
   session_id: z.string().min(1), study_goal: z.string().max(240),
   planned_minutes: z.number().int().min(5).max(480),
   started_at: date, ended_at: date, observation_count: z.number().int().nonnegative(),
+  detector_source_id: z.string().max(100).nullable().optional(),
+  last_observed_at: date.nullable().optional(),
+  signal_origin: z.enum(['none', 'manual', 'detector']).optional(),
 }).refine(value => Date.parse(value.ended_at) >= Date.parse(value.started_at));
 export type SessionSummary = z.infer<typeof summarySchema>;
 export const sessionMinutes = (record: SessionSummary) =>
@@ -60,10 +63,24 @@ export const useLearnSightHistory = createHistoryStore(getStorage());
 export const useLearnSightConnection = create<{
   accessToken: string | null;
   session: LearnSightSession | null;
+  syncError: string | null;
+  connectorUrl: string;
+  autoSync: boolean;
+  isSyncing: boolean;
+  setConnectorUrl: (value: string) => void;
+  setAutoSync: (value: boolean) => void;
+  setIsSyncing: (value: boolean) => void;
+  setSyncError: (value: string | null) => void;
   setAccessToken: (value: string | null) => void;
   setSession: (value: LearnSightSession | null) => void;
 }>(set => ({
   accessToken: null, session: null,
+  syncError: null,
+  connectorUrl: '', autoSync: true, isSyncing: false,
+  setConnectorUrl: connectorUrl => set({ connectorUrl }),
+  setAutoSync: autoSync => set({ autoSync }),
+  setIsSyncing: isSyncing => set({ isSyncing }),
+  setSyncError: syncError => set({ syncError }),
   setAccessToken: accessToken => set({ accessToken }),
   setSession: session => set(state => {
     // A delayed sync response must not reopen an already-ended session.
@@ -74,3 +91,4 @@ export const useLearnSightConnection = create<{
     return { session };
   }),
 }));
+

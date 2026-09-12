@@ -26,7 +26,9 @@ export default function LearnSightHistory() {
         <p className="font-semibold text-gray-900">{record.study_goal}</p>
         <p className="mt-1 text-sm text-gray-600">{new Date(record.started_at).toLocaleString('zh-TW')} → {new Date(record.ended_at).toLocaleString('zh-TW')}</p>
         <p className="mt-1 text-sm text-gray-600">實際時段 {sessionMinutes(record)} 分鐘／預計 {record.planned_minutes} 分鐘 · 同步 {record.observation_count} 次</p>
+        {record.signal_origin && <p className="mt-1 text-xs text-gray-500">來源：{record.detector_source_id || '未指定'} · {record.signal_origin === 'detector' ? 'YOLO 人物訊號' : record.signal_origin === 'manual' ? '手動模擬' : '未接收訊號'}</p>}
       </li>)}</ul>}
     {records.length > 10 && <p className="text-xs text-gray-500">顯示最近 10 筆；匯出包含全部 {records.length} 筆。</p>}
   </Card>;
 }
+

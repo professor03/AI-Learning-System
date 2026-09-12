@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { visionStatus } from '../lib/visionStatus';
+import { syncActiveLearnSight } from '../lib/syncLearnSight';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import {
   endLearnSightSession,
   loginLearnSight,
   startLearnSightSession,
-  syncLearnSightVision,
 } from '../lib/learnsightApi';
 import { useLearnSightConnection, useLearnSightHistory } from '../store/useLearnSightStore';
 import LearnSightHistory from '../components/dashboard/LearnSightHistory';
@@ -27,11 +28,13 @@ const LearnSight = () => {
   });
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { accessToken, setAccessToken, session, setSession } = useLearnSightConnection();
+  const { accessToken, setAccessToken, session, setSession, syncError, setSyncError,
+    setConnectorUrl, autoSync, setAutoSync, isSyncing } = useLearnSightConnection();
+  const [detectorSourceId, setDetectorSourceId] = useState(session?.detector_source_id || 'local-video');
+  const [now, setNow] = useState(Date.now());
   const saveSession = useLearnSightHistory(state => state.save);
   const [goal, setGoal] = useState(session?.study_goal || '完成今天的複習任務');
   const [plannedMinutes, setPlannedMinutes] = useState(session?.planned_minutes || 25);
-  const [autoSync, setAutoSync] = useState(true);
   const [message, setMessage] = useState('尚未連線。登入 YOLO 視覺服務後即可開始。');
   const [isBusy, setIsBusy] = useState(false);
 
@@ -40,30 +43,16 @@ const LearnSight = () => {
     catch { setMessage('無法保存服務網址，重新整理後需要再次填入。'); }
   }, [baseUrl]);
 
-  const syncVision = useCallback(async (showMessage: boolean) => {
-    if (!accessToken || !session || session.status !== 'active') return;
-    try {
-      const next = await syncLearnSightVision(baseUrl, accessToken, session.session_id);
-      setSession(next);
-      if (showMessage) setMessage('已同步最新的人數訊號。');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : '同步失敗');
-    }
-  }, [accessToken, baseUrl, session]);
+  const syncVision = async () => {
+    await syncActiveLearnSight();
+    setMessage(useLearnSightConnection.getState().syncError || '已同步最新的人數訊號。');
+  };
 
   useEffect(() => {
-    if (!autoSync || !accessToken || !session || session.status !== 'active') return;
-    const timer = window.setInterval(() => { void syncVision(false); }, 20_000);
+    const timer = window.setInterval(() => setNow(Date.now()), 1_000);
     return () => window.clearInterval(timer);
-  }, [accessToken, autoSync, session, syncVision]);
-
-  const status = useMemo(() => {
-    if (!session) return { title: '尚未開始時段', detail: '開始後才會讀取 YOLO 的人數摘要。', style: 'bg-slate-50 text-slate-700' };
-    if (session.status === 'ended') return { title: '本次時段已結束', detail: `共接收 ${session.observation_count} 次聚合訊號。`, style: 'bg-slate-100 text-slate-700' };
-    if (session.present_now) return { title: '偵測到有人在畫面範圍', detail: '這不是專注度或動作分類。', style: 'bg-emerald-50 text-emerald-800' };
-    if (session.away_reminder_eligible) return { title: '可選擇發出離席提醒', detail: '只代表一段時間未出現在畫面內，並不評價學習狀態。', style: 'bg-amber-50 text-amber-800' };
-    return { title: '等待下一次視覺同步', detail: '尚未偵測到人員；此訊號不代表分心。', style: 'bg-blue-50 text-blue-800' };
-  }, [session]);
+  }, []);
+  const status = visionStatus(session, syncError, now);
 
   const handleLogin = async () => {
     if (!username.trim() || !password) { setMessage('請輸入 YOLO 視覺服務的帳號與密碼。'); return; }
@@ -71,6 +60,8 @@ const LearnSight = () => {
     try {
       const data = await loginLearnSight(baseUrl, username.trim(), password);
       setAccessToken(data.access_token);
+      setConnectorUrl(baseUrl);
+      setSyncError(null);
       setPassword('');
       setMessage('已連線。登入憑證只保留在這個頁面的記憶體中。');
     } catch (error) {
@@ -85,9 +76,11 @@ const LearnSight = () => {
     }
     setIsBusy(true);
     try {
-      const next = await startLearnSightSession(baseUrl, accessToken, goal, plannedMinutes);
+      const next = await startLearnSightSession(baseUrl, accessToken, goal, plannedMinutes, detectorSourceId);
       setSession(next);
-      setMessage('讀書時段已建立。你可以手動同步，或每 20 秒自動同步一次。');
+      setAutoSync(true);
+      setSyncError(null);
+      setMessage('讀書時段已建立。每 5 秒自動同步，只有新的人物訊號才增加次數。');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '無法建立讀書時段');
     } finally { setIsBusy(false); }
@@ -96,12 +89,15 @@ const LearnSight = () => {
   const handleEnd = async () => {
     if (!accessToken || !session) return;
     setIsBusy(true);
+    const wasAutoSync = autoSync;
+    setAutoSync(false);
     try {
       const next = await endLearnSightSession(baseUrl, accessToken, session.session_id);
       setSession(next);
       const saved = saveSession(next);
       setMessage(saved ? '讀書時段已結束並儲存，可到儀表板回顧。' : '時段已結束，但儲存發生問題，請查看下方紀錄提示。');
     } catch (error) {
+      setAutoSync(wasAutoSync);
       setMessage(error instanceof Error ? error.message : '無法結束讀書時段');
     } finally { setIsBusy(false); }
   };
@@ -139,12 +135,16 @@ const LearnSight = () => {
           <label className="block text-sm font-semibold text-gray-700">本次目標
             <input value={goal} onChange={(event) => setGoal(event.target.value)} disabled={isActive} maxLength={240} className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900 disabled:bg-gray-50" />
           </label>
+          <label className="block text-sm font-semibold text-gray-700">偵測來源代號
+            <input value={detectorSourceId} onChange={event => setDetectorSourceId(event.target.value)} disabled={isActive} maxLength={100} className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900" />
+            <span className="mt-1 block text-xs font-normal text-gray-500">本機影片：local-video；筆電鏡頭：local-camera。須先另行啟動偵測。</span>
+          </label>
           <label className="block text-sm font-semibold text-gray-700">預計分鐘數
             <input value={plannedMinutes} onChange={(event) => setPlannedMinutes(Number(event.target.value))} disabled={isActive} min={5} max={480} type="number" className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900 disabled:bg-gray-50" />
           </label>
           <div className="flex flex-wrap gap-3">
             {!isActive && <Button onClick={() => void handleStart()} disabled={isBusy || !accessToken}>開始 LearnSight 時段</Button>}
-            {isActive && <><Button variant="secondary" onClick={() => void syncVision(true)} disabled={isBusy}>立即同步人數訊號</Button><Button variant="ghost" onClick={() => void handleEnd()} disabled={isBusy}>結束時段</Button></>}
+            {isActive && <><Button variant="secondary" onClick={() => void syncVision()} disabled={isBusy || isSyncing}>立即同步人數訊號</Button><Button variant="ghost" onClick={() => void handleEnd()} disabled={isBusy || isSyncing}>結束時段</Button></>}
           </div>
         </Card>
 
@@ -152,15 +152,21 @@ const LearnSight = () => {
           <p className="text-sm font-bold opacity-70">視覺訊號狀態</p>
           <h2 className="mt-2 text-2xl font-black">{status.title}</h2>
           <p className="mt-3 leading-relaxed">{status.detail}</p>
+          {session && <div className="mt-4 space-y-1 text-sm" data-testid="vision-provenance">
+            <p>訊號來源：{session.detector_source_id || '尚未綁定'} · {session.signal_origin === 'detector' ? 'YOLO 真實推論' : session.signal_origin === 'manual' ? '手動模擬' : '等待資料'}</p>
+            <p>最近有效觀察：{formatDateTime(session.last_observed_at || null)}</p>
+            <p>該次人物框數：{session.person_count ?? '未知'}（歷史觀察值，是否有效請以上方狀態為準）</p>
+          </div>}
           {session && <div className="mt-5 grid grid-cols-2 gap-3 text-sm"><div className="rounded-xl bg-white/60 p-3"><p className="opacity-70">同步次數</p><p className="mt-1 text-xl font-black">{session.observation_count}</p></div><div className="rounded-xl bg-white/60 p-3"><p className="opacity-70">最後偵測到有人</p><p className="mt-1 font-bold">{formatDateTime(session.last_present_at)}</p></div></div>}
           <p className="mt-5 text-xs opacity-75">{message}</p>
         </Card>
       </div>
 
-      {isActive && <Card variant="outline" className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black text-gray-800">每 20 秒自動同步</h3><p className="mt-1 text-sm text-gray-600">從 YOLO 的共用資料摘要讀取人數，不傳送影像。</p></div><label className="flex items-center gap-2 text-sm font-semibold text-gray-700"><input type="checkbox" checked={autoSync} onChange={(event) => setAutoSync(event.target.checked)} />啟用</label></Card>}
+      {isActive && <Card variant="outline" className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black text-gray-800">每 5 秒自動同步</h3><p className="mt-1 text-sm text-gray-600">超過 30 秒未更新或偵測停止時，不將舊訊號當成有人／無人。不傳送影像。</p></div><label className="flex items-center gap-2 text-sm font-semibold text-gray-700"><input type="checkbox" checked={autoSync} onChange={(event) => setAutoSync(event.target.checked)} />啟用</label></Card>}
       <LearnSightHistory />
     </div>
   );
 };
 
 export default LearnSight;
+

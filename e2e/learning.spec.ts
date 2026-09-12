@@ -43,6 +43,8 @@ test('LearnSight end-to-dashboard and reload, without storing credentials', asyn
     started_at: '2026-09-07T10:00:00Z', ended_at: null as string | null,
     status: 'active', observation_count: 0, present_now: false, last_present_at: null,
     absence_started_at: null, away_reminder_eligible: false, source_id: 'ai-student-os', note: '',
+    signal_status: 'fresh', signal_origin: 'detector', last_observed_at: new Date().toISOString(),
+    detector_source_id: 'local-video', person_count: 1,
   };
   await page.route('http://localhost:8000/**', async route => {
     const path = new URL(route.request().url()).pathname;
@@ -86,3 +88,4 @@ test('PDF upload extracts text with bundled worker and stores validated notes', 
   expect(receivedPrompt).toContain('First In First Out');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('ai-student-notes')!)[0].summary)).toBe('PDF 匯入成功');
 });
+

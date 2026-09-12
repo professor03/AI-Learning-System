@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.npm-cache/
 /.pnp
 .pnp.js
 
@@ -50,6 +51,7 @@ Thumbs.db
 .env.*
 !.env.example
 test-results/
+integration-results/
 playwright-report/
 
 # Antigravity artifacts (agent workspace)
@@ -57,3 +59,4 @@ playwright-report/
 
 # Local Netlify folder
 .netlify
+
