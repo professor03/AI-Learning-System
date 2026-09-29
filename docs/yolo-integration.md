@@ -18,6 +18,8 @@
 
 這次使用既有 `sample.avi`，不是作者自攝影片。圖中出現 4 個人物框的訊號，是當次實際模型推論經 API 傳到前端的數值，不是固定的測試回應。圖中連接埠是自動測試隨機分配的；一般使用請按下方預設網址設定，不要照抄測試帳號或埠號。
 
+後續於 2026-09-14 以作者本人筆電前置鏡頭完成「入鏡 → 離開 → 返回」1→0→1 現場實測。YOLO 視窗與 LearnSight 狀態同步顯示，證明同一套流程可由預錄影片切換為即時鏡頭；[查看成果圖片](https://github.com/professor03/yolo-/blob/main/docs/assets/learnsight-front-camera-1-0-1.jpg)與[實測影片](https://github.com/professor03/yolo-/blob/main/docs/assets/learnsight-front-camera-1-0-1-demo.mp4)。
+
 ![停止偵測後，畫面顯示訊號不可用，而非判斷無人](assets/integration/03-detector-stopped.png)
 
 停止偵測後仍保留「最近有效觀察」供追查，但上方狀態明確顯示不能判斷現在有人或無人。這能避免把舊影格的數字當作目前狀態。
@@ -61,7 +63,7 @@ python scripts/detect_demo.py "C:\path\to\your-video.mp4" --duration 180 --show
 python scripts/detect_camera.py --camera-index 0 --duration 180 --show
 ```
 
-鏡頭索引 0 不保證一定是前置鏡頭；找不到時需確認 Windows 權限、其他程式是否占用，以及鏡頭索引。選用 `--fallback-camera-index 0` 可在首選鏡頭不能開啟時嘗試指定備援。這次自動測試沒有開啟任何鏡頭，硬體現場驗證仍待完成。
+鏡頭索引 0 不保證一定是前置鏡頭；找不到時需確認 Windows 權限、其他程式是否占用，以及鏡頭索引。選用 `--fallback-camera-index 0` 可在首選鏡頭不能開啟時嘗試指定備援。2026-09-14 已在作者筆電以索引 0 完成前置鏡頭現場驗證；不同電腦仍需依硬體重新確認索引。
 
 首次使用模型可能下載權重；已有權重時，影片命令可加 `--weights "C:\path\to\yolov8n.pt"`。影像在本機處理，但 YOLO 偵測端仍會產生本機最新標記 JPEG 與實驗輸出；LearnSight 不傳送或保存原始影像。不應因此宣稱整個 YOLO 專案完全不落地影像。
 
@@ -97,7 +99,7 @@ node scripts/verify-yolo-integration.mjs --yolo "C:\path\to\yolo-" --python "C:\
 
 ## 邊界與備審表述
 
-這次證明的是資料流程與錯誤處理。沒有證明學生動作分類、專注度、理解程度或學習提升。自己的鏡頭／影片、實際入鏡離開返回、不同光線與遮擋，仍需要由作者配合完成現場驗證。
+這次證明的是資料流程與錯誤處理。2026-09-14 已完成作者本人前置鏡頭的實際入鏡、離開與返回流程；尚未完成的是不同光線、遮擋、多人場景的正式準確率研究。此成果沒有證明學生動作分類、專注度、理解程度或學習提升。
 
 目前適合單人本機展示：後端時段仍存在單一進程記憶體，重啟會清除；前端重新整理會清除憑證，請先結束時段。沒有多使用者時段存取隔離或雲端歷史同步，不應直接公開部署。較重的 `/health` 診斷端點在本環境未能及時回應；啟動確認使用 `/healthz`，不把診斷問題誤報為整個服務離線。
 
