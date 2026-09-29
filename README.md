@@ -8,7 +8,7 @@
 
 已驗證真實本機影片偵測 → API → 學習時段；切到筆記頁仍持續同步，停止偵測會標示資料不可用，結束後可回顧紀錄。
 
-[**完整操作、實跑截圖與驗證紀錄**](docs/yolo-integration.md)。這是人物訊號整合，不是動作或專注度辨識；前置鏡頭現場驗證仍待作者配合。
+[**完整操作、實跑截圖與驗證紀錄**](docs/yolo-integration.md)。這是人物訊號整合，不是動作或專注度辨識。2026-09-14 已以作者本人筆電前置鏡頭完成「入鏡 → 離開 → 返回」1→0→1 現場實測；[查看成果圖片](https://github.com/professor03/yolo-/blob/main/docs/assets/learnsight-front-camera-1-0-1.jpg)與[實測影片](https://github.com/professor03/yolo-/blob/main/docs/assets/learnsight-front-camera-1-0-1-demo.mp4)。
 
 ## 先看圖文操作
 
@@ -94,7 +94,7 @@ LearnSight 預設連線位址為 `http://localhost:8000`，可在系統設定或
 
 - 真實資料庫／帳號持久化
 - 使用你自己的 Gemini 金鑰驗證實際生成品質
-- 攝影機現場訊號仍需實測；真實本機影片跨專案聯測已通過，見 [整合指南](docs/yolo-integration.md)
+- 前置鏡頭 1→0→1 現場流程與真實本機影片跨專案聯測均已完成，見 [整合指南](docs/yolo-integration.md)；不同光線、遮擋與多人場景的準確率研究仍待補強
 - 掃描 PDF 的 OCR、圖片與錄音輸入尚未支援
 - 研究助手目前僅產生構想，沒有即時網頁檢索，不提供生成的引用網址
 - 儀表板的舊「今日任務」仍以示範資料初始化；LearnSight 新紀錄為獨立的本機保存資料
