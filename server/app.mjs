@@ -25,7 +25,7 @@ export function createApp({ generate, distDir = resolve('dist'), clock = Date.no
     // Codespaces rewrites its own forwarded Origin to the internal HTTP port.
     // Accept only this exact rewrite with the configured public Host, never
     // arbitrary localhost ports or other forwarded hostnames.
-    const rewrittenOrigin = publicOrigin && req.headers.host === new URL(publicOrigin).host
+    const rewrittenOrigin = publicOrigin && [new URL(publicOrigin).host, 'localhost:8787'].includes(req.headers.host)
       && ['http://localhost:8787', 'https://localhost:8787'].includes(origin);
     if (origin && !allowedOrigins.includes(origin) && !rewrittenOrigin) return send(403, { error: '不允許此來源。' });
     if (req.headers['sec-fetch-site'] === 'cross-site' && req.method !== 'GET' && req.method !== 'HEAD') return send(403, { error: '不允許跨站請求。' });
