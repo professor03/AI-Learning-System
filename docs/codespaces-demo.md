@@ -11,7 +11,7 @@
 | `https://<codespace-name>-8787.app.github.dev/learnsight` | 擁有者已啟動、設定為 Public 的實戰展示 | 公開後不需要 |
 
 給評審的是第二種網址，不是 VS Code 編輯器網址，也不是一鍵建立入口。
-在實際雲端驗證完成前，README 不會填入假造的在線網址。
+已於 2026-10-01 驗證 [公開展示網址](https://musical-bassoon-qx95v7p7j55fxpp6-8787.app.github.dev/learnsight)，健康檢查、真實圖片推論與時段結束已通過；本人即時鏡頭與 Gemini 生成尚未驗證。
 
 ## 擁有者：首次啟動
 
@@ -90,7 +90,7 @@ Gemini 真實生成需擁有者在 GitHub Settings → Codespaces → Secrets
 - [ ] 錄影、README、備審 QR Code 指向已驗證網址
 - [ ] 保留 GitHub 實測影片備援：Codespaces 停機時評審仍能看證據
 
-正式在線網址與雲端實跑紀錄需以部署後的驗證結果填入。
+本次部署紀錄與剩餘待驗證項目見下方驗證狀態；網址可用性受 Codespaces 停機、Private 設定及額度限制影響。
 
 已通過與尚待實測的項目見 [驗證狀態](codespaces-validation.md)。
 

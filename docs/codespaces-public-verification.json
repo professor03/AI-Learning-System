@@ -1,0 +1,37 @@
+{
+  "verified_at": "2026-09-30T21:48:41.739Z",
+  "base": "https://musical-bassoon-qx95v7p7j55fxpp6-8787.app.github.dev",
+  "authenticated_github": false,
+  "web": {
+    "status": "ok",
+    "aiConfigured": false,
+    "cloudDemo": true,
+    "visionConfigured": true
+  },
+  "vision": {
+    "status": "ok",
+    "model_ready": true,
+    "model": "YOLOv8n",
+    "device": "cpu",
+    "frame_storage": false
+  },
+  "input": "published comparison image: original left half / blank / same original; not webcam and not an accuracy benchmark",
+  "results": [
+    {
+      "count": 6,
+      "inference_ms": 3879.4
+    },
+    {
+      "count": 0,
+      "inference_ms": 127
+    },
+    {
+      "count": 6,
+      "inference_ms": 135.8
+    }
+  ],
+  "guest_isolation_http": 404,
+  "ended": true,
+  "observations": 3,
+  "post_end_frame_http": 409
+}

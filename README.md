@@ -10,6 +10,12 @@
 
 ## Codespaces 實戰展示
 
+[**開啟公開實戰 Demo：LearnSight × YOLO**](https://musical-bassoon-qx95v7p7j55fxpp6-8787.app.github.dev/learnsight)
+· [**2026-10-01 部署驗證與限制**](docs/codespaces-validation.md)
+
+已驗證外部免 GitHub 登入、真實 YOLO 圖片推論、訪客隔離與結束摘要。
+本人即時鏡頭入鏡／離開／返回待實測；Gemini 金鑰未設定，生成式 AI 尚不可用。
+
 [**建立自己的雲端 Demo**](https://codespaces.new/professor03/AI-Learning-System)
 · [**擁有者公開／訪客操作完整指南**](docs/codespaces-demo.md)
 
