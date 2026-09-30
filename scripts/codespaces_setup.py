@@ -15,6 +15,12 @@ def run(args, cwd=ROOT, env=None):
 
 
 def main():
+    # The minimal Linux Codespaces image does not include OpenCV's shared libs.
+    # This runs only inside Codespaces, never changes a visitor's local machine.
+    if sys.platform == 'linux' and os.environ.get('CODESPACES') == 'true':
+        run(['sudo', 'apt-get', 'update'])
+        run(['sudo', 'apt-get', 'install', '-y', '--no-install-recommends',
+             'libgl1', 'libglib2.0-0'])
     manifest = json.loads((ROOT / 'scripts/demo-versions.json').read_text())
     DEMO.mkdir(exist_ok=True)
     source = DEMO / 'yolo'
