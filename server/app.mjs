@@ -22,7 +22,12 @@ export function createApp({ generate, distDir = resolve('dist'), clock = Date.no
     if (!localHost && (!publicOrigin || req.headers.host !== new URL(publicOrigin).host)) return send(403, { error: '不允許此主機。' });
     const origin = req.headers.origin;
     const allowedOrigins = publicOrigin ? [publicOrigin] : ['http://127.0.0.1:5173', 'http://localhost:5173', `http://${req.headers.host}`];
-    if (origin && !allowedOrigins.includes(origin)) return send(403, { error: '不允許此來源。' });
+    // Codespaces rewrites its own forwarded Origin to the internal HTTP port.
+    // Accept only this exact rewrite with the configured public Host, never
+    // arbitrary localhost ports or other forwarded hostnames.
+    const rewrittenOrigin = publicOrigin && req.headers.host === new URL(publicOrigin).host
+      && origin === 'http://localhost:8787';
+    if (origin && !allowedOrigins.includes(origin) && !rewrittenOrigin) return send(403, { error: '不允許此來源。' });
     if (req.headers['sec-fetch-site'] === 'cross-site' && req.method !== 'GET' && req.method !== 'HEAD') return send(403, { error: '不允許跨站請求。' });
     const path = (req.url || '/').split('?')[0];
     if (path === '/api/health' && req.method === 'GET') return send(200, { status: 'ok', aiConfigured: Boolean(generate), cloudDemo: Boolean(publicOrigin), visionConfigured: Boolean(visionPort) });

@@ -26,6 +26,16 @@ test('gateway proxies only bounded public vision routes', async () => {
   expect((await fetch(url + '/vision/admin/start', { method: 'POST' })).status).toBe(404);
   expect((await fetch(url + '/vision/auth/guest', { method: 'POST', body: 'a'.repeat(300001) })).status).toBe(413);
 });
+test('Codespaces origin rewrite requires exact public host and internal port', async () => {
+  const url = await start({ publicOrigin: 'https://example-8787.app.github.dev' });
+  const request = headers => new Promise((resolve, reject) => {
+    const req = httpRequest(url + '/api/health', { headers }, res => { res.resume(); res.on('end', () => resolve(res.statusCode)); });
+    req.on('error', reject); req.end();
+  });
+  expect(await request({Host:'example-8787.app.github.dev',Origin:'http://localhost:8787'})).toBe(200);
+  expect(await request({Host:'example-8787.app.github.dev',Origin:'http://localhost:8000'})).toBe(403);
+  expect(await request({Origin:'http://localhost:8787'})).toBe(403);
+});
 test('cloud daily AI quota bounds billable calls', async () => {
   const url = await start({ generate: async () => 'real provider adapter', dailyAiLimit: 1 });
   const run = () => fetch(url + '/api/ai/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ prompt: 'test' }) });
