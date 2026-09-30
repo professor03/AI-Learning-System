@@ -33,6 +33,7 @@ test('Codespaces origin rewrite requires exact public host and internal port', a
     req.on('error', reject); req.end();
   });
   expect(await request({Host:'example-8787.app.github.dev',Origin:'http://localhost:8787'})).toBe(200);
+  expect(await request({Host:'example-8787.app.github.dev',Origin:'https://localhost:8787'})).toBe(200);
   expect(await request({Host:'example-8787.app.github.dev',Origin:'http://localhost:8000'})).toBe(403);
   expect(await request({Origin:'http://localhost:8787'})).toBe(403);
 });

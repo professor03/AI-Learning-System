@@ -26,9 +26,8 @@ export function createApp({ generate, distDir = resolve('dist'), clock = Date.no
     // Accept only this exact rewrite with the configured public Host, never
     // arbitrary localhost ports or other forwarded hostnames.
     const rewrittenOrigin = publicOrigin && req.headers.host === new URL(publicOrigin).host
-      && origin === 'http://localhost:8787';
-    if (origin && !allowedOrigins.includes(origin) && !rewrittenOrigin) return send(403, { error: '不允許此來源。',
-      ...(/^https?:\/\/localhost(?::\d+)?\/?$/.test(origin) ? { localProxyOrigin: origin } : {}) });
+      && ['http://localhost:8787', 'https://localhost:8787'].includes(origin);
+    if (origin && !allowedOrigins.includes(origin) && !rewrittenOrigin) return send(403, { error: '不允許此來源。' });
     if (req.headers['sec-fetch-site'] === 'cross-site' && req.method !== 'GET' && req.method !== 'HEAD') return send(403, { error: '不允許跨站請求。' });
     const path = (req.url || '/').split('?')[0];
     if (path === '/api/health' && req.method === 'GET') return send(200, { status: 'ok', aiConfigured: Boolean(generate), cloudDemo: Boolean(publicOrigin), visionConfigured: Boolean(visionPort) });
