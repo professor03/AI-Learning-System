@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">AI-Learning-System 系統架構</title>
+  <desc id="desc">學習者與教材進入 React 學習工作台，工作台連接 AI 代理與 Gemini，並將筆記、測驗、知識卡及複習記錄保存於本機。LearnSight 可額外接收人物訊號。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#466477"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#183a4a" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .bg{fill:#f6faf8}.title{font:700 44px 'Microsoft JhengHei','Noto Sans TC',sans-serif;fill:#123b32}.subtitle{font:400 23px 'Microsoft JhengHei','Noto Sans TC',sans-serif;fill:#4d675f}.box{fill:#fff;stroke:#c8d8d2;stroke-width:2;rx:24;filter:url(#shadow)}.core{fill:#e7f5ee;stroke:#55977c}.ai{fill:#edf2fb;stroke:#7791bd}.data{fill:#fff4df;stroke:#c89a45}.vision{fill:#f2edfb;stroke:#8e74b4}.label{font:700 27px 'Microsoft JhengHei','Noto Sans TC',sans-serif;fill:#193a33}.body{font:400 21px 'Microsoft JhengHei','Noto Sans TC',sans-serif;fill:#3e5750}.small{font:400 19px 'Microsoft JhengHei','Noto Sans TC',sans-serif;fill:#567068}.arrow{stroke:#466477;stroke-width:4;fill:none;marker-end:url(#arrow)}.dash{stroke-dasharray:12 10}.tag{fill:#0f6f58}.tagtext{font:700 18px 'Microsoft JhengHei','Noto Sans TC',sans-serif;fill:#fff}
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="900"/>
+  <text class="title" x="800" y="70" text-anchor="middle">AI-Learning-System 系統架構</text>
+  <text class="subtitle" x="800" y="110" text-anchor="middle">將教材、AI 生成、自我測驗與後續複習整合成同一學習流程</text>
+
+  <rect class="box" x="70" y="270" width="250" height="200"/>
+  <text class="label" x="195" y="330" text-anchor="middle">學習者／教材</text>
+  <text class="body" x="105" y="380">• 輸入學習內容</text>
+  <text class="body" x="105" y="420">• 作答與複習</text>
+
+  <rect class="box core" x="410" y="205" width="420" height="330"/>
+  <rect class="tag" x="440" y="230" width="122" height="34" rx="17"/>
+  <text class="tagtext" x="501" y="254" text-anchor="middle">核心應用</text>
+  <text class="label" x="620" y="315" text-anchor="middle">React／TypeScript 學習工作台</text>
+  <text class="body" x="460" y="365">• 教材匯入與 AI 筆記</text>
+  <text class="body" x="460" y="408">• 測驗、作答回饋與錯題衔接</text>
+  <text class="body" x="460" y="451">• 知識卡、間隔複習與學習時段</text>
+  <text class="body" x="460" y="494">• LearnSight 視覺訊號狀態</text>
+
+  <rect class="box ai" x="930" y="165" width="290" height="190"/>
+  <text class="label" x="1075" y="220" text-anchor="middle">Node 本機 AI 代理</text>
+  <text class="body" x="975" y="270">• 請求管理</text>
+  <text class="body" x="975" y="310">• 失敗處理</text>
+
+  <rect class="box ai" x="1300" y="165" width="230" height="190"/>
+  <text class="label" x="1415" y="230" text-anchor="middle">Gemini</text>
+  <text class="body" x="1335" y="280">筆記／測驗</text>
+  <text class="body" x="1335" y="315">內容生成</text>
+
+  <rect class="box data" x="930" y="445" width="290" height="190"/>
+  <text class="label" x="1075" y="500" text-anchor="middle">本機學習狀態</text>
+  <text class="body" x="975" y="550">• 筆記與知識卡</text>
+  <text class="body" x="975" y="590">• 測驗與複習記錄</text>
+
+  <rect class="box vision" x="410" y="650" width="420" height="150"/>
+  <text class="label" x="620" y="705" text-anchor="middle">LearnSight 人物訊號</text>
+  <text class="body" x="465" y="752">來源、人數、時間戳、有效性與錯誤狀態</text>
+
+  <path class="arrow" d="M320 370 H395"/>
+  <path class="arrow" d="M830 310 C875 310 880 260 915 260"/>
+  <path class="arrow" d="M1220 260 H1285"/>
+  <path class="arrow" d="M830 425 C875 425 880 540 915 540"/>
+  <path class="arrow dash" d="M620 650 V550"/>
+
+  <text class="small" x="365" y="349" text-anchor="middle">操作</text>
+  <text class="small" x="870" y="270" text-anchor="middle">AI 請求</text>
+  <text class="small" x="1252" y="242" text-anchor="middle">API</text>
+  <text class="small" x="870" y="508" text-anchor="middle">保存</text>
+  <text class="small" x="653" y="608" text-anchor="middle">可選外部訊號</text>
+
+  <text class="small" x="800" y="860" text-anchor="middle">驗證現況：26 項單元測試＋3 項 Chrome 端對端測試，正式建置成功</text>
+</svg>

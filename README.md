@@ -1,8 +1,23 @@
 # AI Learning System
 
+[![Tests](https://github.com/professor03/AI-Learning-System/actions/workflows/ci.yml/badge.svg)](https://github.com/professor03/AI-Learning-System/actions/workflows/ci.yml)
+![React + TypeScript](https://img.shields.io/badge/React-TypeScript-3178C6)
+![Research prototype](https://img.shields.io/badge/status-research_prototype-0f766e)
+
 一個以「理解、複習、追蹤學習行為」為核心的 AI 學習系統原型，整合筆記／PDF 學習、AI 問答與測驗、間隔複習，以及 LearnSight 人物訊號服務。
 
 > 這是學習研究與推甄展示用的 prototype。部分資料層目前使用 mock data，Gemini API 與 YOLO/LearnSight 需要依照本機環境設定後才能完整運作。
+
+## 評審三分鐘導覽
+
+| 想確認什麼 | 直接閱讀 |
+| --- | --- |
+| 問題、架構、個人貢獻與驗證證據 | [推甄作品說明](docs/portfolio-case-study.md) |
+| 初學者實際操作方式 | [圖文操作指南](docs/visual-guide.md) |
+| YOLO 跨專案整合與真實證據 | [LearnSight 整合紀錄](docs/yolo-integration.md) |
+| 功能狀態與測試界線 | [功能與驗證紀錄](docs/IMPLEMENTATION_REPORT.md) |
+
+![AI Learning System 系統架構](docs/assets/architecture-ai-learning-system.svg)
 
 ## YOLO 真實整合（2026-09-12）
 
@@ -115,6 +130,8 @@ LearnSight 只提供人員存在的聚合訊號；時段分鐘數不等於專注
 
 ## 驗證
 
+2026-09-30 以乾淨工作副本核對：**26 項單元測試、3 條 Chrome 端到端流程與正式建置全部通過**。端到端流程涵蓋離線教材／測驗／複習與保存、LearnSight 結束時段與重新載入、PDF 匯入。這些結果證明流程可執行，不代表 Gemini 內容品質、人物偵測準確率或學習成效。
+
 ```bash
 npm test
 npm run build
@@ -162,3 +179,7 @@ Windows 已安裝 Chrome 時，可設定 `PLAYWRIGHT_CHANNEL=chrome` 執行瀏�
 ### 個人貢獻與使用 AI 的界線
 
 本專題由林琨茂個人提出整合方向並完成系統設計、前端流程串接、測試與展示。開發時大量使用 AI 協助撰寫與修訂程式；最終由作者整合、測試並確認功能邊界。README 僅描述已實作或測試的功能，並保留 mock data、離線示範與研究驗證尚待補強的限制。
+
+## 授權狀態
+
+本倉庫目前未附開源授權條款。公開可檢閱不代表自動授權複製、修改或再散布；第三方套件仍適用其各自授權。
