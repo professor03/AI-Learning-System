@@ -47,7 +47,7 @@ const request = async <T>(
       },
     });
   } catch {
-    throw new Error('無法連上 LearnSight 視覺服務。請確認 YOLO 服務已在本機執行。');
+    throw new Error('無法連上 LearnSight 視覺服務。請確認服務已啟動；雲端 Demo 可能已停機。');
   }
 
   if (!response.ok) throw new Error(await parseError(response));

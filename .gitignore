@@ -60,3 +60,6 @@ playwright-report/
 # Local Netlify folder
 .netlify
 
+# Isolated Codespaces runtime, models, guest state and logs
+.demo/
+

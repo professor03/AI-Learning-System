@@ -8,6 +8,17 @@
 
 > 這是學習研究與推甄展示用的 prototype。部分資料層目前使用 mock data，Gemini API 與 YOLO/LearnSight 需要依照本機環境設定後才能完整運作。
 
+## Codespaces 實戰展示
+
+[**建立自己的雲端 Demo**](https://codespaces.new/professor03/AI-Learning-System)
+· [**擁有者公開／訪客操作完整指南**](docs/codespaces-demo.md)
+
+雲端版支援訪客自己的鏡頭／圖片 → 真實 YOLOv8n 人物推論 → LearnSight
+時段 → 結束摘要。訪客時段隔離，影格需同意才傳送、不儲存。
+Gemini 生成需設定伺服器 Codespaces secret；未設定會明確告知，不偽裝成果。
+一鍵入口用於建立環境；給評審的公開實戰網址必須在環境啟動後取得，
+不是永久在線。重啟後需重新公開 8787，並保留 [實測影片備援](docs/yolo-integration.md)。
+
 ## 評審三分鐘導覽
 
 | 想確認什麼 | 直接閱讀 |

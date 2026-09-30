@@ -10,9 +10,11 @@ import {
 } from '../lib/learnsightApi';
 import { useLearnSightConnection, useLearnSightHistory } from '../store/useLearnSightStore';
 import LearnSightHistory from '../components/dashboard/LearnSightHistory';
+import BrowserVision from '../components/BrowserVision';
 
 const CONNECTOR_URL_KEY = 'ai-student-learnsight-url';
 const DEFAULT_CONNECTOR_URL = import.meta.env.VITE_LEARNSIGHT_API_URL || 'http://localhost:8000';
+const CLOUD_DEMO = import.meta.env.VITE_CLOUD_DEMO === '1';
 
 const formatDateTime = (value: string | null) => {
   if (!value || !Number.isFinite(Date.parse(value))) return '尚無資料';
@@ -23,6 +25,7 @@ const formatDateTime = (value: string | null) => {
 
 const LearnSight = () => {
   const [baseUrl, setBaseUrl] = useState(() => {
+    if (CLOUD_DEMO) return '/vision';
     try { return window.localStorage.getItem(CONNECTOR_URL_KEY) || DEFAULT_CONNECTOR_URL; }
     catch { return DEFAULT_CONNECTOR_URL; }
   });
@@ -30,7 +33,7 @@ const LearnSight = () => {
   const [password, setPassword] = useState('');
   const { accessToken, setAccessToken, session, setSession, syncError, setSyncError,
     setConnectorUrl, autoSync, setAutoSync, isSyncing } = useLearnSightConnection();
-  const [detectorSourceId, setDetectorSourceId] = useState(session?.detector_source_id || 'local-video');
+  const [detectorSourceId, setDetectorSourceId] = useState(session?.detector_source_id || (CLOUD_DEMO ? 'browser-camera' : 'local-video'));
   const [now, setNow] = useState(Date.now());
   const saveSession = useLearnSightHistory(state => state.save);
   const [goal, setGoal] = useState(session?.study_goal || '完成今天的複習任務');
@@ -70,13 +73,21 @@ const LearnSight = () => {
   };
 
   const handleStart = async () => {
-    if (!accessToken) { setMessage('請先連線至 YOLO 視覺服務。'); return; }
+    if (!accessToken && !CLOUD_DEMO) { setMessage('請先連線至 YOLO 視覺服務。'); return; }
     if (!goal.trim() || !Number.isInteger(plannedMinutes) || plannedMinutes < 5 || plannedMinutes > 480) {
       setMessage('請輸入學習目標，分鐘數需為 5～480 的整數。'); return;
     }
     setIsBusy(true);
     try {
-      const next = await startLearnSightSession(baseUrl, accessToken, goal, plannedMinutes, detectorSourceId);
+      let token = accessToken;
+      if (!token && CLOUD_DEMO) {
+        const response = await fetch('/vision/auth/guest', { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || '無法建立訪客連線。');
+        token = data.access_token as string;
+        setAccessToken(token); setConnectorUrl('/vision');
+      }
+      const next = await startLearnSightSession(baseUrl, token!, goal, plannedMinutes, detectorSourceId);
       setSession(next);
       setAutoSync(true);
       setSyncError(null);
@@ -109,10 +120,10 @@ const LearnSight = () => {
       <div>
         <p className="text-sm font-bold uppercase tracking-[0.24em] text-primary-600">Privacy-first vision connector</p>
         <h1 className="mt-2 text-3xl font-black text-gray-900">LearnSight 學習時段</h1>
-        <p className="mt-3 max-w-3xl text-gray-600">把讀書目標與 YOLO 的人數摘要放在同一個流程。LearnSight 不保存影像、不做人臉辨識，也不以畫面判斷專注程度。</p>
+        <p className="mt-3 max-w-3xl text-gray-600">把讀書目標與 YOLO 的人數摘要放在同一個流程。{CLOUD_DEMO ? '雲端模式僅在你同意後接收壓縮影格做推論，不保存影像。' : '本機模式不傳送影像。'}不做人臉辨識，也不以畫面判斷專注程度。</p>
       </div>
 
-      <Card className="border border-blue-100 bg-gradient-to-br from-blue-50 to-white">
+      {!CLOUD_DEMO && <Card className="border border-blue-100 bg-gradient-to-br from-blue-50 to-white">
         <div className="flex flex-col gap-4 md:flex-row md:items-end">
           <label className="flex-1 text-sm font-semibold text-gray-700">YOLO 服務網址
             <input value={baseUrl} disabled={Boolean(accessToken)} onChange={(event) => setBaseUrl(event.target.value)} placeholder="http://localhost:8000" className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none ring-primary focus:ring-2" />
@@ -127,7 +138,8 @@ const LearnSight = () => {
           {accessToken && <Button variant="ghost" disabled={isBusy || session?.status === 'active'} onClick={() => { setAccessToken(null); setSession(null); setMessage('已登出。'); }}>登出</Button>}
         </div>
         <p className="mt-3 text-xs text-gray-500">密碼不會被保存；存取憑證只留在目前頁面的記憶體，重新整理後需再次登入。</p>
-      </Card>
+      </Card>}
+      {CLOUD_DEMO && <Card><p>Codespaces 實戰 Demo：不需共用帳號，每位訪客的時段獨立。先填寫目標並開始時段，再於下方啟用鏡頭。服務可能因擁有者停機或額度而離線。</p><p className="mt-2 text-sm">AI 生成需要擁有者設定 Gemini 伺服器金鑰；未設定時會明確報錯，不以預製答案假裝生成。</p></Card>}
 
       <div className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
         <Card className="space-y-4">
@@ -136,14 +148,14 @@ const LearnSight = () => {
             <input value={goal} onChange={(event) => setGoal(event.target.value)} disabled={isActive} maxLength={240} className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900 disabled:bg-gray-50" />
           </label>
           <label className="block text-sm font-semibold text-gray-700">偵測來源代號
-            <input value={detectorSourceId} onChange={event => setDetectorSourceId(event.target.value)} disabled={isActive} maxLength={100} className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900" />
-            <span className="mt-1 block text-xs font-normal text-gray-500">本機影片：local-video；筆電鏡頭：local-camera。須先另行啟動偵測。</span>
+            <input value={detectorSourceId} onChange={event => setDetectorSourceId(event.target.value)} disabled={isActive || CLOUD_DEMO} maxLength={100} className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900" />
+            <span className="mt-1 block text-xs font-normal text-gray-500">{CLOUD_DEMO ? 'browser-camera：由你的瀏覽器輸入，雲端模型推論。' : '本機影片：local-video；筆電鏡頭：local-camera。須先另行啟動偵測。'}</span>
           </label>
           <label className="block text-sm font-semibold text-gray-700">預計分鐘數
             <input value={plannedMinutes} onChange={(event) => setPlannedMinutes(Number(event.target.value))} disabled={isActive} min={5} max={480} type="number" className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900 disabled:bg-gray-50" />
           </label>
           <div className="flex flex-wrap gap-3">
-            {!isActive && <Button onClick={() => void handleStart()} disabled={isBusy || !accessToken}>開始 LearnSight 時段</Button>}
+            {!isActive && <Button onClick={() => void handleStart()} disabled={isBusy || (!accessToken && !CLOUD_DEMO)}>開始 LearnSight 時段</Button>}
             {isActive && <><Button variant="secondary" onClick={() => void syncVision()} disabled={isBusy || isSyncing}>立即同步人數訊號</Button><Button variant="ghost" onClick={() => void handleEnd()} disabled={isBusy || isSyncing}>結束時段</Button></>}
           </div>
         </Card>
@@ -162,7 +174,8 @@ const LearnSight = () => {
         </Card>
       </div>
 
-      {isActive && <Card variant="outline" className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black text-gray-800">每 5 秒自動同步</h3><p className="mt-1 text-sm text-gray-600">超過 30 秒未更新或偵測停止時，不將舊訊號當成有人／無人。不傳送影像。</p></div><label className="flex items-center gap-2 text-sm font-semibold text-gray-700"><input type="checkbox" checked={autoSync} onChange={(event) => setAutoSync(event.target.checked)} />啟用</label></Card>}
+      {CLOUD_DEMO && <BrowserVision />}
+      {isActive && <Card variant="outline" className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-black text-gray-800">每 5 秒自動同步摘要</h3><p className="mt-1 text-sm text-gray-600">超過 30 秒未更新或偵測停止時，不將舊訊號當成有人／無人。{CLOUD_DEMO ? '影格傳送由上方鏡頭同意設定控制。' : '不傳送影像。'}</p></div><label className="flex items-center gap-2 text-sm font-semibold text-gray-700"><input type="checkbox" checked={autoSync} onChange={(event) => setAutoSync(event.target.checked)} />啟用</label></Card>}
       <LearnSightHistory />
     </div>
   );
